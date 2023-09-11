@@ -1,14 +1,16 @@
-from flask import Flask, request, jsonify
 from functools import lru_cache
 from cachetools import TTLCache
 import requests
+from pymongo import MongoClient
 
-
-app = Flask(__name__)
+# client = MongoClient('mongodb+srv://AmitKartun:AmitKartun15@cluster0.j8py5wt.mongodb.net/', 27017)
+# db = client["FlightsDB"]
+# collection = db["Flights"]
 
 cache = TTLCache(ttl=1799, maxsize=1)
 
 
+# given
 def get_headers():
     if "key" in cache:
         return cache["key"]
@@ -24,18 +26,12 @@ def get_headers():
     return {"Authorization": "Bearer {}".format(token)}
 
 
-@app.route('/search-flight', methods=['GET'])
-def search_flight():
-    source = request.args.get('source')
-    destination = request.args.get('destination')
-    date = request.args.get('date')
-
-    header = get_headers()
-    response = requests.request("GET", f'https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode={source}&destinationLocationCode={destination}&departureDate={date}&adults=1',
-                                headers=header)
-    flights = response.json()
-    return jsonify(flights)    # Return the flight data as JSON response
+header = get_headers()
+response = requests.request("GET", 'https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=SYD&destinationLocationCode=BKK&departureDate=2023-10-10&adults=1',
+                            headers=header)
+flights = response.json()
+print(flights['data'][0])
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+# collection.insert_one(flights['data'][0])
