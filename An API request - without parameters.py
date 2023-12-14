@@ -1,37 +1,29 @@
-from functools import lru_cache
-from cachetools import TTLCache
-import requests
-from pymongo import MongoClient
+function fetchFlightOffers(location, destination, date) {
+    const url = `http://127.0.0.1:5000/get_flight_offers?location=${location}&destination=${destination}&date=${date}`;
 
-# client = MongoClient('mongodb+srv://AmitKartun:AmitKartun15@cluster0.j8py5wt.mongodb.net/', 27017)
-# db = client["FlightsDB"]
-# collection = db["Flights"]
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Handle the flight offers data received from the server
+            console.log('Flight offers:', data);
+            // Perform further operations with the flight offers data
+        })
+        .catch(error => {
+            // Handle any errors that occur during the fetch request
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
 
-cache = TTLCache(ttl=1799, maxsize=1)
+// Example usage:
+// Replace these values with user input or from other sources
+const userLocation = 'SYD';
+const userDestination = 'BKK';
+const userDate = '2024-01-01';
 
-
-# given
-def get_headers():
-    if "key" in cache:
-        return cache["key"]
-
-    url = "https://test.api.amadeus.com/v1/security/oauth2/token?grant_type=client_credentials"
-    payload = 'grant_type=client_credentials&client_id=vbBEiaYVFLSXbtJgXUOwmJrvTn0DffGR&client_secret=JtgN8WKBP6apH5ix'
-    headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
-    response = requests.request("POST", url, headers=headers, data=payload)
-    token = response.json()["access_token"]
-    cache["key"] = {"Authorization": "Bearer {}".format(token)}
-    return {"Authorization": "Bearer {}".format(token)}
-
-
-header = get_headers()
-response = requests.request("GET", 'https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=SYD&destinationLocationCode=BKK&departureDate=2023-10-10&adults=1',
-                            headers=header)
-flights = response.json()
-print(flights['data'][0])
-
-
-
-# collection.insert_one(flights['data'][0])
+// Call the function with user-provided parameters
+fetchFlightOffers(userLocation, userDestination, userDate);
